@@ -33,11 +33,24 @@ exports.handler = async function (event, context) {
 
   const access_token = await refreshAccessToken();
 
+  const targets = {
+    "trivia": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/deployments/trivia/#/background?channel=alexjpaz&token={access_token}",
+    "litty": "https://loving-lovelace-0225ae.netlify.app/?channel=alexjpaz%26token={access_token}",
+    "alerts": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/alerts/?channel=alexjpaz&token={access_token}",
+  };
+
+  const target = targets[event.queryStringParameters.target];
+
+  const redirect_url = target.replace("{access_token}", access_token);;
+
   return {
-    statusCode: 302,
+    statusCode: 200,
     headers: {
-      Location: event.queryStringParameters.redirect_url.replace("{access_token}", access_token)
-    }
+      'Cache-Control': 'max-age=21600'
+    },
+    body: `
+      <script>location.assign("${redirect_url}")</script>
+    `
   };
 };
 
