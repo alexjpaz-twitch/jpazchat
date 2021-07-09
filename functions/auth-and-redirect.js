@@ -46,7 +46,6 @@ exports.handler = async function (event, context) {
   return {
     statusCode: 200,
     headers: {
-      'Cache-Control': 'max-age=21600'
     },
     body: `
       <script>location.assign("${redirect_url}")</script>
