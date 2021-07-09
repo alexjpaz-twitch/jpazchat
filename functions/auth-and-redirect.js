@@ -36,7 +36,7 @@ exports.handler = async function (event, context) {
   const targets = {
     "trivia": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/deployments/trivia/#/background?channel=alexjpaz&token={access_token}",
     "litty": "https://loving-lovelace-0225ae.netlify.app/?channel=alexjpaz&token={access_token}",
-    "alerts": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/alerts/?channel=alexjpaz&token={access_token}",
+    "alerts": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/alerts/?channel=alexjpaz&twitch_token={access_token}",
   };
 
   const target = targets[event.queryStringParameters.target];
