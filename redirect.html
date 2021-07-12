@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang=en>
+  <head>
+    <meta charset=utf-8>
+    <title>jpazchat redirect</title>
+  </head>
+  <body>
+    <script>
+        async function getAccessToken(app_token) {
+          let item = JSON.parse(localStorage.getItem("access_token") || "{}");
+
+          return item.access_token;
+        }
+
+        async function init() {
+          const url = new URL(location.href);
+
+          const target = url.searchParams.get("target");
+
+          const access_token = await getAccessToken();
+
+          if(target) {
+            const targets = {
+              "trivia": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/deployments/trivia/#/background?channel=alexjpaz&token={access_token}",
+              "litty": "https://loving-lovelace-0225ae.netlify.app/?channel=alexjpaz&token={access_token}",
+              "alerts": "https://dhttm9zkbfvzw.cloudfront.net/alexjpaz-twitch/alerts/?channel=alexjpaz&twitch_token={access_token}",
+            };
+
+            let redirect_url = targets[target];
+
+            redirect_url = redirect_url.replace("{access_token}", access_token);
+
+            location.assign(redirect_url);
+          }
+        }
+
+        init();
+    </script>
+  </body>
+</html>
