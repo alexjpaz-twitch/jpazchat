@@ -15,7 +15,7 @@
           const params = new URLSearchParams(`?`+location.hash.replace("#",""));
           const access_token = params.get("access_token");
 
-          link.href = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=3ojhrt7dm27vm7a8l0adg314q6aw1w&redirect_uri=${location.origin + location.pathname}&scope=channel:manage:redemptions%20channel:read:redemptions%20user:read:email%20chat:edit%20chat:read`
+          link.href = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=ua0rupiy8k7196c5rhu4eszdcgo5cx&redirect_uri=${location.origin + location.pathname}&scope=channel:manage:redemptions%20channel:read:redemptions%20user:read:email%20chat:edit%20chat:read`
 
           try {
             const rsp = await fetch("https://id.twitch.tv/oauth2/validate", {
