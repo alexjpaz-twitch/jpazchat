@@ -1,21 +1,30 @@
 <!doctype html>
 <html lang=en>
-  <head>
-    <meta charset=utf-8>
-    <title>jpazchat oauth</title>
-  </head>
-  <body>
-    <a id='link' href="">Authenticate</a>
-    <pre id='result'></pre>
-    <script>
-        const link = document.querySelector('#link');
-        const result = document.querySelector('#result');
+
+<head>
+  <meta charset=utf-8>
+  <title>jpazchat oauth</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="./assets/style.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
+
+<body>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <div id="root"></div>
+  <script type="text/babel">
+    function Main() {
+      const [result, setResult] = React.useState({"empty": "true"});
+
+      React.useEffect(() => {
 
         async function init() {
-          const params = new URLSearchParams(`?`+location.hash.replace("#",""));
+          const params = new URLSearchParams(`?` + location.hash.replace("#", ""));
           const access_token = params.get("access_token");
-
-          link.href = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=ua0rupiy8k7196c5rhu4eszdcgo5cx&redirect_uri=${location.origin + location.pathname}&scope=channel:manage:redemptions%20channel:read:redemptions%20user:read:email%20chat:edit%20chat:read`
 
           try {
             const rsp = await fetch("https://id.twitch.tv/oauth2/validate", {
@@ -24,24 +33,149 @@
               }
             });
 
-                  console.log(rsp)
+            console.log(rsp)
 
-            if(rsp.status === 401) {
+            if (rsp.status === 401) {
               throw new Error("Token is invalid")
             }
 
             const data = await rsp.json();
 
-            result.innerHTML = `Refreshed\n${JSON.stringify(data, null, 2)}`;
             localStorage.setItem("access_token", JSON.stringify({
               access_token
             }));
-          } catch(e) {
-            result.innerHTML = e.toString();
+
+            setResult({
+              success: true,
+              data
+            });
+          } catch (e) {
+            console.error(e);
+            setResult({
+              error: e.toString(),
+              data
+            });
           }
         }
 
         init();
-    </script>
-  </body>
+      }, [])
+
+      return (
+        <div className="flex-container">
+          <div className="centered-box">
+            <div className="mdl-card mdl-shadow--2dp">
+              <div className="mdl-card__title">
+                <h2 className="mdl-card__title-text">Token Helper</h2>
+              </div>
+              <div className="mdl-card__supporting-text">
+                  <TokenDisplay result={result} />
+              </div>
+            </div>
+            <br />
+            <CopylinkForObs />
+            <br />
+            <AuthenticateButton />
+          </div>
+        </div>
+      );
+    }
+
+    function TokenDisplay({ result }) {
+
+
+      return (
+        <div>
+          {/* if result is null or result.success is false display error chip */}
+          {(result === null || !result.success) && (
+            <span className="mdl-chip mdl-chip--contact">
+              <span className="mdl-chip__contact mdl-color--red mdl-color-text--white">!</span>
+              <span className="mdl-chip__text">Please Authenticate</span>
+            </span>
+          )}
+          {/* if result is not null and result.success is true display success chip */} 
+          {(result !== null && result.success) && (
+          <span className="mdl-chip mdl-chip--contact">
+              <span className="mdl-chip__contact mdl-color--teal mdl-color-text--white">
+                {/* null check result.data.login and display first character capitalized */}
+                {result.data && result.data.login.charAt(0).toUpperCase()}
+              </span>
+              <span className="mdl-chip__text">
+                {result.data && result.data.login}
+              </span>
+          </span>
+          )}
+          {/* display result.data.loging, do a null check, check if user is "jpazchat" and if true display a warning icon */}
+          {result.data && result.data.login !== "jpazchat" && (
+              <span className="mdl-chip mdl-chip--contact">
+                <span className="mdl-chip__contact mdl-color--red mdl-color-text--white">!</span>
+                <span className="mdl-chip__text">You are not logged in as jpazchat!</span>
+              </span>
+          )}
+          {/* check if result.expires_in is going to expire soon (less than a week) and show a warning chip */}
+          {result.data && result.data.expires_in < 604800 && (
+            <span className="mdl-chip mdl-chip--contact">
+              <span className="mdl-chip__contact mdl-color--orange mdl-color-text--white">!</span>
+              <span className="mdl-chip__text">Token will expire soon!</span>
+            </span>
+          )}
+          
+          
+
+          {(result !== null && result.success) && (
+          <details>
+            <summary>
+              Click to expand token details
+              <span className="icon">👇</span>
+            </summary>
+            <pre>
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          </details>
+          )}
+        </div>
+      );
+    }
+
+    function CopylinkForObs() {
+
+      const [clicked, setClicked] = React.useState(false);
+
+
+      // get current url path with hash but only select "access_token"
+      const params = new URLSearchParams(`?` + location.hash.replace("#", ""));
+      const access_token = params.get("access_token");
+
+      const href = `${location.origin + location.pathname}#access_token=${access_token}`;
+
+      const onClick = () => {
+        setClicked(true);
+        navigator.clipboard.writeText(href);
+      }
+
+      return (
+        <a className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" href={href} onClick={onClick}>
+          {clicked ? "Copied!" : "Copy link for OBS"}
+        </a>
+      )
+    }
+
+    function AuthenticateButton() {
+      const href = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=ua0rupiy8k7196c5rhu4eszdcgo5cx&redirect_uri=${location.origin + location.pathname}&scope=channel:manage:redemptions%20channel:read:redemptions%20user:read:email%20chat:edit%20chat:read`
+
+
+      return (
+        <a className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" href={href}>
+          Authenticate
+        </a>
+      );
+    }
+
+    ReactDOM.render(
+      <Main />,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
 </html>

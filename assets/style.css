@@ -1,0 +1,20 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.centered-box {
+    display: flex;
+    flex-direction: column;
+    max-width: 90%;
+    box-sizing: border-box;
+    margin-top: 5vh
+}
